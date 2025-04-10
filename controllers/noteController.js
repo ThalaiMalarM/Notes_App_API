@@ -6,7 +6,6 @@ const { createNoteSchema, updateNoteSchema } = require("../validations/noteValid
 // @route   POST /api/notes
 exports.createNote = async (req, res) => {
     try {
-        console.log("req.user: ", req.user); 
         const { error } = createNoteSchema.validate(req.body);
         if (error) return res.status(400).json({ message: error.details[0].message });
         const note = await Note.create({
@@ -61,3 +60,32 @@ exports.deleteNote = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+// @desc    Toggle favorite
+// @route   PUT /api/notes/:id/favorite
+exports.toggleFavorite = async (req, res) => {
+    try {
+      const note = await Note.findOne({ _id: req.params.id, user: req.user.id });
+  
+      if (!note) return res.status(404).json({ message: "Note not found" });
+  
+      note.isFavorite = !note.isFavorite;
+      await note.save();
+  
+      res.status(200).json({ message: `Note ${note.isFavorite ? "marked as" : "removed from"} favorites`, note });
+    } catch (err) {
+      res.status(500).json({ message: "Server error" });
+    }
+  };
+  
+  // @desc    Get all favorite notes
+  // @route   GET /api/notes/favorites
+  exports.getFavorites = async (req, res) => {
+    try {
+      const favorites = await Note.find({ user: req.user.id, isFavorite: true });
+      res.status(200).json(favorites);
+    } catch (err) {
+      res.status(500).json({ message: "Server error" });
+    }
+  };
+  

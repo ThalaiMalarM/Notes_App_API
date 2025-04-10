@@ -14,6 +14,10 @@ const noteSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  isFavorite: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Note", noteSchema);
